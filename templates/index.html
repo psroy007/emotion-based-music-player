@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion-based Music Player</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #ffeb3b);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            animation: fadeIn 1s ease-out;
+        }
+
+        /* Title Styling */
+        h1 {
+            font-size: 36px;
+            color: #212121;
+            margin: 0;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: slideIn 0.7s ease-out;
+        }
+
+        h2 {
+            color: #4CAF50;
+            font-size: 26px;
+            margin-bottom: 10px;
+            animation: slideIn 0.7s ease-out;
+        }
+
+        h3 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #emotion-display {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            transition: color 0.5s ease-in-out;
+            text-transform: capitalize;
+        }
+
+        /* Video Feed Styling */
+        #video-feed {
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.2);
+            border: 3px solid #ffffff;
+            transition: transform 0.3s ease-in-out;
+            margin: 20px auto;
+            display: block;
+        }
+
+        #video-feed:hover {
+            transform: scale(1.05);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 900px;
+            width: 90%;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: slideUp 0.7s ease-out;
+        }
+
+        .content {
+            margin: 20px 0;
+        }
+
+        /* Button Styling */
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 768px) {
+            h1 {
+                font-size: 30px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            h3 {
+                font-size: 20px;
+            }
+
+            #video-feed {
+                width: 100%;
+                height: auto;
+            }
+
+            .container {
+                padding: 15px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 18px;
+            }
+
+            #emotion-display {
+                font-size: 24px;
+            }
+
+            .button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Emotion-based Music Player</h1>
+
+        <!-- Live Webcam Feed -->
+        <div class="content">
+            <h2>Live Emotion Detection</h2>
+            <img src="{{ url_for('video_feed') }}" width="640" height="480" id="video-feed" onerror="alert('Unable to load video feed.')">
+        </div>
+
+        <!-- Display Detected Emotion -->
+        <div class="content">
+            <h3>Detected Emotion:</h3>
+            <div id="emotion-display">Neutral</div>
+        </div>
+
+        <div class="content">
+            <button class="button" onclick="location.reload();">Refresh Webcam</button>
+        </div>
+    </div>
+
+    <script>
+        // Dynamically update the emotion display
+        function updateEmotionColor(emotion) {
+            const emotionDisplay = document.getElementById("emotion-display");
+
+            const colors = {
+                Angry: '#FF5722',
+                Happy: '#4CAF50',
+                Sad: '#2196F3',
+                Fear: '#FFC107',
+                Surprise: '#9C27B0',
+                Disgust: '#795548',
+                Neutral: '#607D8B',
+            };
+
+            emotionDisplay.style.color = colors[emotion] || '#000000';
+            emotionDisplay.innerText = emotion;
+        }
+
+        async function fetchEmotion() {
+            try {
+                const response = await fetch('/current_emotion');
+                if (response.ok) {
+                    const emotion = await response.text();
+                    updateEmotionColor(emotion);
+                } else {
+                    console.error("Failed to fetch emotion");
+                }
+            } catch (error) {
+                console.error("Error fetching emotion:", error);
+            }
+        }
+
+        // Poll the server for updates every second
+        setInterval(fetchEmotion, 1000);
+    </script>
+</body>
+</html>
